@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ namespace }};
+
+use FunctionalTester;
+
+
+class {{ className }}Cest 
+{
+    public function _before(FunctionalTester $tester) {}
+}
