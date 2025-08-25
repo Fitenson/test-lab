@@ -6,7 +6,7 @@ use FunctionalTester;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Faker\Provider\zh_CN\Person;
-use Fitenson\TestLab\Constant\Scenario;
+
 
 abstract class CestSupport {
     protected Generator $faker;
