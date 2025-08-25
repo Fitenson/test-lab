@@ -4,9 +4,9 @@
     "type": "library",
     "require": {
         "yiisoft/yii2": "~2.0.0",
-        "codeception/codeception": "^4.2",
+        "codeception/codeception": "^4.0",
         "codeception/module-yii2": "^1.0.0",
-        "phpunit/phpunit": "^9.5",
+        "phpunit/phpunit": "^8.5",
         "fakerphp/faker": "^1.13",
         "yiisoft/yii2-faker": "^2.0.0",
         "codeception/module-phpbrowser": "^1.0.0",
