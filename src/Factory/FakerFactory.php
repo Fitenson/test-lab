@@ -1,13 +1,47 @@
 <?php
 
-namespace Fitenson\TestLab\Core;
+namespace Fitenson\TestLab\Factory;
 
 use Yii;
 use Faker\Generator;
+use Fitenson\TestLab\Constant\Scenario;
+use Fitenson\TestLab\Strategy\GenerationStrategy;
+use Fitenson\TestLab\Strategy\RandomValueStrategy;
 use yii\db\Schema;
 
 
-abstract class Faker {
+abstract class FakerFactory {
+    public $db;
+
+
+    public function __construct($db)
+    {
+        $this->db = $db;
+    }
+
+
+    public function createStrategy(string $className, string $scenario): GenerationStrategy
+    {
+        $strategy = null;
+        $db = $this->db;
+
+        switch($scenario) {
+            default:
+                $strategy = new RandomValueStrategy($className, $db);
+        }
+
+
+        return $strategy;
+    }
+
+
+    public function generate(string $className, string $scenario): array
+    {
+        $strategy = $this->createStrategy($className, $scenario);
+        return $strategy->generate($className, $this->db);
+    }
+
+
     public function generateRandomData(string $className, Generator $faker, ?string $scenario): array
     {
         $model = new $className;
