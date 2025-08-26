@@ -1,0 +1,82 @@
+<?php
+
+namespace Fitenson\TestLab\Scenario;
+
+use FunctionalTester;
+
+
+class Scenario {
+    public FunctionalTester $tester;
+    private ApiScenarioBuilder $apiScenarioBuilder;
+    protected ?string $authToken = null;
+
+    /**     @var callable | null    */
+    protected $successHandler = null;
+
+    /**     @var callable | null    */
+    protected $errorHandler = null;
+
+
+    public function __construct(FunctionalTester $tester)
+    {
+        $this->tester = $tester;
+        $this->apiScenarioBuilder = new ApiScenarioBuilder($tester);
+    }
+
+
+    public function login(string $account, string $username, string $password): self 
+    {
+        $this->tester->sendPOST('/site/api/site/login', [
+            'account' => $account,
+            'username' => $username,
+            'password' => $password
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $this->tester->seeResponseIsJson();
+
+        $response = json_decode($this->tester->grabResponse(), true);
+
+        if(!isset($response['data']['accessToken'])) {
+            if(!empty($this->errorHandler)) {
+                call_user_func($this->errorHandler, $response, $this->tester);
+            } else {
+                $this->tester->fail('Login Failed. Cannot get access token');
+            }
+        }
+
+        $this->authToken = $response['data']['accessToken'];
+        $this->tester->haveHttpHeader('Authorization', 'Basic ' . $this->authToken);
+
+        if(!empty($this->successHandler)) {
+            call_user_func($this->successHandler, $this);
+        }
+
+        return $this;
+    }
+
+
+    public function getToken(): ?string
+    {
+        return $this->authToken;
+    }
+
+
+    public function sendPOST(string $url, array $data = []): ApiScenarioBuilder
+    {
+        return $this->apiScenarioBuilder->sendPOST($url, $data);
+    }
+
+
+    public function sendGET(string $url, mixed $params): ApiScenarioBuilder
+    {
+        return $this->apiScenarioBuilder->sendGET($url, $params);
+    }
+
+
+    public function checkDatabase(string $table, array $criteria): self
+    {
+        $this->tester->seeInDatabase($table, $criteria);
+        return $this;
+    }
+}

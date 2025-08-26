@@ -23,23 +23,24 @@ class RandomValueStrategy implements GenerationStrategy {
 
         $modelSchema = $db->getTableSchema($model::tableName());
 
-        $fields = [];
-        $formData = isset($formData) ? $model::tableName() : null;
-
-        // Initialize nested structure
-
-        $isNested = true;
-
-        if(!is_null($formData)) {
-            $fields[$formData] = [];
-        } else {
-            $fields = [];
-            $isNested = false;
+        $foreignKeyColumns = [];
+        
+        foreach($modelSchema->foreignKeys as $foreignKey) {
+            foreach($foreignKey as $column => $reference) {
+                if(is_string($column)) {
+                    $foreignKeyColumns[] = $column;
+                }
+            }
         }
 
+        $fields = [];
 
         foreach ($modelSchema->columns as $column) {
             $name = $column->name;
+
+            if(in_array($name, $foreignKeyColumns, true)) {
+                continue;
+            }
 
             switch ($column->type) {
                 case Schema::TYPE_STRING:
@@ -48,52 +49,32 @@ class RandomValueStrategy implements GenerationStrategy {
                     ? $faker->words(2, true)
                     : $faker->text(5);
 
-                    if($isNested) {
-                        $fields[$formData][$name] = $data;
-                    } else {
-                        $fields[$name] = $data;
-                    }
+                    $fields[$name] = $data;
                     break;
 
                 case Schema::TYPE_INTEGER:
                     $data = $faker->numberBetween(1, $column->size ?? 1000);
 
-                    if($isNested) {
-                        $fields[$formData][$name] = $data;
-                    } else {
-                        $fields[$name] = $data;
-                    }
+                    $fields[$name] = $data;
                     break;
 
                 case Schema::TYPE_BOOLEAN:
                     $data = $faker->boolean();
 
-                    if($isNested) {
-                        $fields[$formData][$name] = $data;
-                    } else {
-                        $fields[$name] = $data;
-                    }
+                    $fields[$name] = $data;
                     break;
 
                 case Schema::TYPE_FLOAT:
                 case Schema::TYPE_DECIMAL:
                     $data = $faker->randomFloat(2, 0, $column->size ?? 1000);
 
-                    if($isNested) {
-                        $fields[$formData][$name] = $data;
-                    } else {
-                        $fields[$name] = $data;
-                    }
+                    $fields[$name] = $data;
                     break;
 
                 default:
                     $data = null; // fallback
 
-                    if($isNested) {
-                        $fields[$formData][$name] = $data;
-                    } else {
-                        $fields[$name] = $data;
-                    }
+                    $fields[$name] = $data;
                     break;
             }
         }
