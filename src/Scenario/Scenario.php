@@ -67,13 +67,13 @@ class Scenario {
 
     public function sendPOST(string $url, array $data = []): ApiScenarioBuilder
     {
-        return $this->apiScenarioBuilder->sendPOST($url, $data);
+        return $this->apiScenarioBuilder->sendPOST($url, $data, $this->apiScenarioBuilder->expectError);
     }
 
 
     public function sendGET(string $url, mixed $params): ApiScenarioBuilder
     {
-        return $this->apiScenarioBuilder->sendGET($url, $params);
+        return $this->apiScenarioBuilder->sendGET($url, $params, $this->apiScenarioBuilder->expectError);
     }
 
 
@@ -87,6 +87,13 @@ class Scenario {
     public function checkResponse(array $criteria): self
     {
         $this->apiScenarioBuilder->checkResponse($criteria);
+        return $this;
+    }
+
+
+    public function expectError(bool $expectError = true): self
+    {
+        $this->apiScenarioBuilder->expectError = $expectError;
         return $this;
     }
 }

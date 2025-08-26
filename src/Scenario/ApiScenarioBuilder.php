@@ -19,9 +19,16 @@ class ApiScenarioBuilder extends ScenarioBuilder
     {
         try {
             $this->tester->sendPOST($url, $data);
-            $this->tester->seeResponseCodeIsSuccessful();
-            $this->triggerSuccess();
-        } catch(Throwable $error) {
+
+            if (!$this->expectError) {
+                $this->tester->seeResponseCodeIsSuccessful();
+                $this->triggerSuccess();
+            } else {
+                // Assert it's NOT successful (e.g. 400, 422, 500, etc.)
+                $this->tester->seeResponseCodeIsBetween(400, 599);
+                $this->triggerError(new \Exception("Expected error response received"));
+            }
+        } catch (Throwable $error) {
             $this->triggerError($error);
         }
 
@@ -33,8 +40,15 @@ class ApiScenarioBuilder extends ScenarioBuilder
     {
         try {
             $this->tester->sendGET($url);
-            $this->tester->seeResponseCodeIsSuccessful();
-        } catch(Throwable $error) {
+
+            if (!$this->expectError) {
+                $this->tester->seeResponseCodeIsSuccessful();
+                $this->triggerSuccess();
+            } else {
+                $this->tester->seeResponseCodeIsBetween(400, 599);
+                $this->triggerError(new \Exception("Expected error response received"));
+            }
+        } catch (Throwable $error) {
             $this->triggerError($error);
         }
 

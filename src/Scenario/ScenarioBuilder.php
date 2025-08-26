@@ -19,6 +19,12 @@ abstract class ScenarioBuilder {
     /** @var callable|null */
     protected $errorCallback = null;
 
+    /** @var bool   */
+    public bool $expectError = false;
+
+    /** @var bool   */
+    protected ?bool $lastResult = null;
+
 
     public function __construct(FunctionalTester $tester)
     {
@@ -37,6 +43,7 @@ abstract class ScenarioBuilder {
         return $this;
     }
 
+
     public function whenError(callable $callback): self
     {
         $this->errorCallback = $callback;
@@ -51,6 +58,8 @@ abstract class ScenarioBuilder {
 
     protected function triggerSuccess(): void
     {
+        $this->lastResult = true;
+
         if ($this->successCallback) {
             $callback = $this->successCallback;
             $this->successCallback = null; // reset
@@ -67,19 +76,31 @@ abstract class ScenarioBuilder {
 
     protected function triggerError(\Throwable $error): void
     {
+        $this->lastResult = false;
         codecept_debug("❌ Scenario Error: " . $error->getMessage());
+
         if ($this->errorCallback) {
             $callback = $this->errorCallback;
             $this->errorCallback = null; // reset
             $callback($this, $error);
         }
 
-        throw new AssertionFailedError($error->getMessage());
+        if(!$this->expectError) {
+            throw new AssertionFailedError($error->getMessage());
+        }
     }
 
 
-    public function checkResponse(array $criteria): bool
+    public function checkResponse(array $criteria): self
     {
-        return $this->tester->seeResponseContainsJson($criteria);
+        $this->tester->seeResponseContainsJson($criteria);
+        return  $this;
+    }
+
+
+    public function whenExpectError(): self
+    {
+        $this->expectError = true;
+        return $this;
     }
 }
