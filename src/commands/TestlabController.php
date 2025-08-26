@@ -1,6 +1,6 @@
 <?php
 
-namespace Fitenson\TestLab\commands;
+namespace Fitenson\TestLab\Commands;
 
 use Yii;
 use yii\console\Controller;
