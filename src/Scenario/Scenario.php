@@ -45,8 +45,11 @@ class Scenario {
             }
         }
 
-        $this->authToken = $response['data']['accessToken'];
-        $this->tester->haveHttpHeader('Authorization', 'Basic ' . $this->authToken);
+        $authToken = $response['data']['accessToken'];
+        $this->authToken = $authToken;
+
+        $header = base64_encode($username . ':' . $authToken);
+        $this->tester->haveHttpHeader('Authorization', 'Basic ' . $header);
 
         if(!empty($this->successHandler)) {
             call_user_func($this->successHandler, $this);
@@ -77,6 +80,13 @@ class Scenario {
     public function checkDatabase(string $table, array $criteria): self
     {
         $this->tester->seeInDatabase($table, $criteria);
+        return $this;
+    }
+
+
+    public function checkResponse(array $criteria): self
+    {
+        $this->apiScenarioBuilder->checkResponse($criteria);
         return $this;
     }
 }

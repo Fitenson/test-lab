@@ -4,6 +4,8 @@ namespace Fitenson\TestLab\Scenario;
 
 use FunctionalTester;
 use RuntimeException;
+use PHPUnit\Framework\AssertionFailedError;
+
 
 abstract class ScenarioBuilder {
     protected FunctionalTester $tester;
@@ -71,5 +73,13 @@ abstract class ScenarioBuilder {
             $this->errorCallback = null; // reset
             $callback($this, $error);
         }
+
+        throw new AssertionFailedError($error->getMessage());
+    }
+
+
+    public function checkResponse(array $criteria): bool
+    {
+        return $this->tester->seeResponseContainsJson($criteria);
     }
 }
